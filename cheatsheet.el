@@ -1,11 +1,8 @@
 ;;; cheatsheet.el --- create your own cheatsheet
+;; I (Andrew De Angelis) am working on this package for possible enhancements
+;;    bobodeangelis@gmail.com
 
 ;; Copyright (C) 2015 Shirin Nikita and contributors
-;;
-;; Author: Shirin Nikita <shirin.nikita@gmail.com> and contributors
-;; URL: http://github.com/darksmile/cheatsheet/
-;; Package-Requires: ((emacs "24") (cl-lib "0.5"))
-;; Version: 1.0
 ;; Keywords: convenience, usability
 
 ;; This file is not part of GNU Emacs
@@ -65,6 +62,11 @@
   "Get CHEAT description."
   (cheatsheet--if-symbol-to-string (plist-get cheat :description)))
 
+(defun cheatsheet--cheat-name (cheat)
+  ; this will be useful later
+  "Get CHEAT name."
+  (cheatsheet--if-symbol-to-string (plist-get cheat :name)))
+
 ;; Functions to get data from CHEATSHEET in convenient format
 (defun cheatsheet--cheat-groups ()
   "Get all groups, submitted to cheatsheet."
@@ -112,10 +114,33 @@
          (formatted-cheatsheet (apply 'concat formatted-groups)))
     formatted-cheatsheet))
 
+(defvar cheatsheet--modifiedp nil
+  "Keep track of whether the cheatsheet list has been modified.")
+
+(defvar cheatsheet--path-to-list-file
+  "/Users/andrewdeangelis/.emacs.d/elpa/cheatsheet-20170126.2150/cheatsheet.el"
+  "Variable for the path to the file where the cheatsheet list is kept")
+
+(defun cheatsheet--save-list-on-exit ()
+  "When closing emacs, save the current cheatsheet list.
+Check if the list has been modified, and if so,
+re-write the 'setq' call in this file"
+  (if cheatsheet--modifiedp
+      (with-current-buffer (find-file-noselect cheatsheet--path-to-list-file)
+	(replace-regexp "(setq cheatsheet--cheat-list '(+.*)+"
+			(format "(setq cheatsheet--cheat-list '%s)"
+				cheatsheet--cheat-list)))))
+
+;; this variable is custom-set by the above function.
+;; It should not be broken up with newlines
+;; (unless you want to change the above regexp accordingly)
+(setq cheatsheet--cheat-list '((:group Common :key "C-x C-c" :name "save-buffers-kill-terminal" :description "leave Emacs.")))
+
 ;; Interface
 ;;;###autoload
 (defun cheatsheet-add (&rest cheat)
   "Add CHEAT to cheatsheet."
+  (setq cheatsheet--modifiedp t)
   (add-to-list 'cheatsheet--cheat-list cheat))
 
 (defun cheatsheet-get ()
