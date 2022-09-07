@@ -139,7 +139,7 @@
 (defun cheatsheet-save-list-to-elisp-file ()
   "Save the current cheatsheet list.
 Check if the list has been modified, and if so,
-re-write the 'setq' call in this file"
+re-write the `setq' call in this file"
   (if cheatsheet--modifiedp
       (with-current-buffer (find-file-noselect cheatsheet--path-to-list-file)
 	;; (replace-regexp set-list-rgx
